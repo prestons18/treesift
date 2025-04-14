@@ -21,6 +21,28 @@ export interface ComponentContext {
     configObject: string; // Stringified or parsed object
   }[];
 
+  classNames: {
+    importSource: string | null;
+    importName: string | null;
+    usages: Array<{
+      line: number;
+      column: number;
+      arguments: string[];
+    }>;
+  };
+
+  stylingLibrary: {
+    type:
+      | "tailwind"
+      | "css-modules"
+      | "styled-components"
+      | "emotion"
+      | "custom"
+      | "unknown";
+    confidence: number; // 0-100 confidence score
+    indicators: string[]; // Specific indicators that led to this conclusion
+  };
+
   contexts: {
     consumes: string[]; // Contexts used via useContext
     provides: string[]; // Contexts created via createContext
