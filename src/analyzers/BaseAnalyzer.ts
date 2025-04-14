@@ -1,4 +1,4 @@
-import { ComponentContext } from "../context/ComponentContext";
+import { ComponentContext } from '../context/ComponentContext';
 
 /**
  * @file Base abstract class for all TreeSift analyzers

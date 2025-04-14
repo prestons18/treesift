@@ -21,12 +21,12 @@
  * });
  */
 
-import { parse } from "@babel/parser";
-import * as t from "@babel/types";
-import { createRequire } from "module";
+import { parse } from '@babel/parser';
+import * as t from '@babel/types';
+import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
-const traverse = require("@babel/traverse").default;
+const traverse = require('@babel/traverse').default;
 
 export class ASTParser {
   /**
@@ -34,10 +34,10 @@ export class ASTParser {
    * @param code - The source code to parse
    * @returns A Babel AST representation of the code
    */
-  static parseCode(code: string) {
+  static parseCode(code: string): t.File {
     return parse(code, {
-      sourceType: "module",
-      plugins: ["typescript", "jsx"],
+      sourceType: 'module',
+      plugins: ['typescript', 'jsx'],
     });
   }
 
@@ -46,7 +46,7 @@ export class ASTParser {
    * @param ast - The Abstract Syntax Tree to traverse
    * @param callback - Function to call for each node in the AST
    */
-  static traverseAST(ast: t.File, callback: (path: any) => void) {
+  static traverseAST(ast: t.File, callback: (path: any) => void): void {
     traverse(ast, {
       enter(path: any) {
         callback(path);

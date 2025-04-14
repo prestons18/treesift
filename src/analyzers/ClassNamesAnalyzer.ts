@@ -21,15 +21,15 @@
  * console.log(componentContext.classNames); // { importSource, importName, usages }
  */
 
-import { ASTParser } from "src/parser/ASTParser";
-import * as t from "@babel/types";
-import { BaseAnalyzer } from "./BaseAnalyzer";
-import { ComponentContext } from "../context/ComponentContext";
+import { ASTParser } from 'src/parser/ASTParser';
+import * as t from '@babel/types';
+import { BaseAnalyzer } from './BaseAnalyzer';
+import { ComponentContext } from '../context/ComponentContext';
 
 export class ClassNamesAnalyzer extends BaseAnalyzer {
-  name = "ClassNamesAnalyzer";
-  description = "Analyzes classNames utility (cn) usage in components";
-  category = "styling";
+  name = 'ClassNamesAnalyzer';
+  description = 'Analyzes classNames utility (cn) usage in components';
+  category = 'styling';
 
   analyze(node: any, context: ComponentContext): void {
     const cnInfo: {
@@ -46,23 +46,23 @@ export class ClassNamesAnalyzer extends BaseAnalyzer {
       usages: [],
     };
 
-    ASTParser.traverseAST(node, (path) => {
+    ASTParser.traverseAST(node, path => {
       // Detect cn import
       if (t.isImportDeclaration(path.node)) {
         const source = path.node.source.value;
         if (
-          typeof source === "string" &&
-          (source.includes("clsx") ||
-            source.includes("classnames") ||
-            source.includes("tailwind-merge"))
+          typeof source === 'string' &&
+          (source.includes('clsx') ||
+            source.includes('classnames') ||
+            source.includes('tailwind-merge'))
         ) {
           path.node.specifiers.forEach((specifier: any) => {
             if (
               t.isImportSpecifier(specifier) &&
               t.isIdentifier(specifier.local) &&
-              (specifier.local.name === "cn" ||
-                specifier.local.name === "clsx" ||
-                specifier.local.name === "classNames")
+              (specifier.local.name === 'cn' ||
+                specifier.local.name === 'clsx' ||
+                specifier.local.name === 'classNames')
             ) {
               cnInfo.importSource = source;
               cnInfo.importName = specifier.local.name;
@@ -75,9 +75,9 @@ export class ClassNamesAnalyzer extends BaseAnalyzer {
       if (
         t.isCallExpression(path.node) &&
         t.isIdentifier(path.node.callee) &&
-        (path.node.callee.name === "cn" ||
-          path.node.callee.name === "clsx" ||
-          path.node.callee.name === "classNames")
+        (path.node.callee.name === 'cn' ||
+          path.node.callee.name === 'clsx' ||
+          path.node.callee.name === 'classNames')
       ) {
         const args = this.extractArguments(path.node.arguments);
 
@@ -95,7 +95,7 @@ export class ClassNamesAnalyzer extends BaseAnalyzer {
 
   private extractArguments(args: any[]): string[] {
     return args
-      .map((arg) => {
+      .map(arg => {
         // String literals
         if (t.isStringLiteral(arg)) {
           return arg.value;
@@ -103,7 +103,7 @@ export class ClassNamesAnalyzer extends BaseAnalyzer {
 
         // Template literals
         if (t.isTemplateLiteral(arg)) {
-          return arg.quasis.map((q: any) => q.value.raw).join("");
+          return arg.quasis.map((q: any) => q.value.raw).join('');
         }
 
         // Conditional expressions
@@ -125,10 +125,10 @@ export class ClassNamesAnalyzer extends BaseAnalyzer {
             .map((prop: any) => {
               if (t.isObjectProperty(prop) && t.isIdentifier(prop.key)) {
                 return `${prop.key.name}: ${
-                  t.isBooleanLiteral(prop.value) ? prop.value.value : "true"
+                  t.isBooleanLiteral(prop.value) ? prop.value.value : 'true'
                 }`;
               }
-              return "";
+              return '';
             })
             .filter(Boolean);
         }
@@ -137,9 +137,9 @@ export class ClassNamesAnalyzer extends BaseAnalyzer {
         if (
           t.isCallExpression(arg) &&
           t.isIdentifier(arg.callee) &&
-          (arg.callee.name === "cn" ||
-            arg.callee.name === "clsx" ||
-            arg.callee.name === "classNames")
+          (arg.callee.name === 'cn' ||
+            arg.callee.name === 'clsx' ||
+            arg.callee.name === 'classNames')
         ) {
           return this.extractArguments(arg.arguments);
         }
@@ -156,13 +156,13 @@ export class ClassNamesAnalyzer extends BaseAnalyzer {
       const left = t.isIdentifier(test.left)
         ? test.left.name
         : t.isMemberExpression(test.left)
-        ? this.extractMemberExpression(test.left)
-        : String(test.left);
+          ? this.extractMemberExpression(test.left)
+          : String(test.left);
       const right = t.isNumericLiteral(test.right)
         ? test.right.value
         : t.isStringLiteral(test.right)
-        ? `"${test.right.value}"`
-        : String(test.right);
+          ? `"${test.right.value}"`
+          : String(test.right);
       return `${left} ${test.operator} ${right}`;
     }
     return String(test);

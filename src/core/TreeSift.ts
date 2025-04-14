@@ -15,17 +15,17 @@
  * design system tooling, and static code analysis.
  */
 
-import { HookAnalyzer } from "../analyzers/HookAnalyzer";
-import { ImportAnalyzer } from "../analyzers/ImportAnalyzer";
-import { PropAnalyzer } from "../analyzers/PropAnalyzer";
-import { ExportAnalyzer } from "../analyzers/ExportAnalyzer";
-import { JSXElementAnalyzer } from "../analyzers/JSXElementAnalyzer";
-import { CVAAnalyzer } from "../analyzers/CVAAnalyzer";
-import { ClassNamesAnalyzer } from "../analyzers/ClassNamesAnalyzer";
-import { StylingLibraryAnalyzer } from "../analyzers/StylingLibraryAnalyzer";
-import { ComponentNameAnalyzer } from "../analyzers/ComponentNameAnalyzer";
-import { ComponentContext } from "../context/ComponentContext";
-import { ASTParser } from "../parser/ASTParser";
+import { HookAnalyzer } from '../analyzers/HookAnalyzer';
+import { ImportAnalyzer } from '../analyzers/ImportAnalyzer';
+import { PropAnalyzer } from '../analyzers/PropAnalyzer';
+import { ExportAnalyzer } from '../analyzers/ExportAnalyzer';
+import { JSXElementAnalyzer } from '../analyzers/JSXElementAnalyzer';
+import { CVAAnalyzer } from '../analyzers/CVAAnalyzer';
+import { ClassNamesAnalyzer } from '../analyzers/ClassNamesAnalyzer';
+import { StylingLibraryAnalyzer } from '../analyzers/StylingLibraryAnalyzer';
+import { ComponentNameAnalyzer } from '../analyzers/ComponentNameAnalyzer';
+import { ComponentContext } from '../context/ComponentContext';
+import { ASTParser } from '../parser/ASTParser';
 
 export class TreeSift {
   /**
@@ -96,9 +96,9 @@ export default MyComponent;
 
     // Create a component context to store analysis results
     const context: ComponentContext = {
-      name: "Unknown",
+      name: 'Unknown',
       filePath: filePath,
-      exportType: "default",
+      exportType: 'default',
       props: [],
       hooks: [],
       cvaConfigs: [],
@@ -117,7 +117,7 @@ export default MyComponent;
         usages: [],
       },
       stylingLibrary: {
-        type: "unknown",
+        type: 'unknown',
         confidence: 0,
         indicators: [],
       },

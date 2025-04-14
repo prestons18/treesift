@@ -97,7 +97,7 @@ export class JSXElementAnalyzer extends BaseAnalyzer {
 
   private extractChildInfo(
     child: t.JSXElement | t.JSXText | t.JSXExpressionContainer | t.JSXFragment
-  ) {
+  ): { type: 'text' | 'element' | 'expression' | 'fragment'; content: string } | null {
     if (t.isJSXText(child)) {
       const content = child.value.trim();
       return content ? { type: 'text' as const, content } : null;

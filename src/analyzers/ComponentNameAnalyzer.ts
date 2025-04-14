@@ -21,20 +21,20 @@
  * console.log(componentContext.name); // "MyComponent"
  */
 
-import { ASTParser } from "src/parser/ASTParser";
-import * as t from "@babel/types";
-import { BaseAnalyzer } from "./BaseAnalyzer";
-import { ComponentContext } from "../context/ComponentContext";
+import { ASTParser } from 'src/parser/ASTParser';
+import * as t from '@babel/types';
+import { BaseAnalyzer } from './BaseAnalyzer';
+import { ComponentContext } from '../context/ComponentContext';
 
 export class ComponentNameAnalyzer extends BaseAnalyzer {
-  name = "ComponentNameAnalyzer";
-  description = "Detects component names in React components";
-  category = "react";
+  name = 'ComponentNameAnalyzer';
+  description = 'Detects component names in React components';
+  category = 'react';
 
   analyze(node: any, context: ComponentContext): void {
-    let componentName = "Unknown";
+    let componentName = 'Unknown';
 
-    ASTParser.traverseAST(node, (path) => {
+    ASTParser.traverseAST(node, path => {
       // Check for export default function
       if (
         t.isExportDefaultDeclaration(path.node) &&
@@ -59,8 +59,7 @@ export class ComponentNameAnalyzer extends BaseAnalyzer {
         t.isVariableDeclarator(path.node) &&
         t.isIdentifier(path.node.id) &&
         path.node.id.name.match(/^[A-Z]/) &&
-        (t.isFunctionExpression(path.node.init) ||
-          t.isArrowFunctionExpression(path.node.init))
+        (t.isFunctionExpression(path.node.init) || t.isArrowFunctionExpression(path.node.init))
       ) {
         componentName = path.node.id.name;
       }

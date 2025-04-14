@@ -20,25 +20,25 @@
  * console.log(componentContext.hooks); // Array of { name, arguments }
  */
 
-import { ASTParser } from "src/parser/ASTParser";
-import * as t from "@babel/types";
-import { BaseAnalyzer } from "./BaseAnalyzer";
-import { ComponentContext } from "../context/ComponentContext";
+import { ASTParser } from 'src/parser/ASTParser';
+import * as t from '@babel/types';
+import { BaseAnalyzer } from './BaseAnalyzer';
+import { ComponentContext } from '../context/ComponentContext';
 
 export class HookAnalyzer extends BaseAnalyzer {
-  name = "HookAnalyzer";
-  description = "Analyzes React hooks usage";
-  category = "react";
+  name = 'HookAnalyzer';
+  description = 'Analyzes React hooks usage';
+  category = 'react';
 
   analyze(node: any, context: ComponentContext): void {
-    const hooks: ComponentContext["hooks"] = [];
+    const hooks: ComponentContext['hooks'] = [];
 
-    ASTParser.traverseAST(node, (path) => {
+    ASTParser.traverseAST(node, path => {
       if (t.isCallExpression(path.node) && t.isIdentifier(path.node.callee)) {
         const calleeName = path.node.callee.name;
 
         // Basic React hook pattern
-        if (calleeName.startsWith("use")) {
+        if (calleeName.startsWith('use')) {
           const args = path.node.arguments
             .map((arg: any) => {
               if (t.isIdentifier(arg)) return arg.name;
@@ -50,17 +50,14 @@ export class HookAnalyzer extends BaseAnalyzer {
                     if (t.isIdentifier(el)) return el.name;
                     if (t.isStringLiteral(el)) return el.value;
                     if (t.isNumericLiteral(el)) return el.value.toString();
-                    return "...";
+                    return '...';
                   })
-                  .join(", ")}]`;
+                  .join(', ')}]`;
               }
-              if (
-                t.isArrowFunctionExpression(arg) ||
-                t.isFunctionExpression(arg)
-              ) {
-                return "() => {...}";
+              if (t.isArrowFunctionExpression(arg) || t.isFunctionExpression(arg)) {
+                return '() => {...}';
               }
-              return "...";
+              return '...';
             }) // As you can see, this minifies the expressions
             .filter((arg: string | null): arg is string => arg !== null);
 
