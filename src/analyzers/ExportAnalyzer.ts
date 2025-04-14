@@ -1,3 +1,26 @@
+/**
+ * @file Analyzer for detecting export statements
+ * @author Preston Arnold
+ * @license MIT
+ * @repository https://github.com/prestons18/treesift
+ * @created 14/04/24
+ * @lastModified 14/04/24
+ *
+ * Description:
+ * ------------------------------------------------------
+ * ExportAnalyzer identifies and analyzes export statements within React components.
+ * It detects both named and default exports, handling various export patterns
+ * including variable declarations, function declarations, and re-exports.
+ * This analyzer is crucial for understanding how components are exposed to other
+ * parts of the application.
+ *
+ * Usage:
+ * ------------------------------------------------------
+ * const analyzer = new ExportAnalyzer();
+ * analyzer.analyze(ast, componentContext);
+ * console.log(componentContext.exportType); // "default" or "named"
+ */
+
 import { ASTParser } from "src/parser/ASTParser";
 import * as t from "@babel/types";
 import { BaseAnalyzer } from "./BaseAnalyzer";

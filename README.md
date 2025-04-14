@@ -1,43 +1,42 @@
 # 🌳 TreeSift
 
-A clean, minimal Abstract Syntax Tree (AST) analysis library for JavaScript and TypeScript —  
-built for component discovery, documentation pipelines, and design system tooling.
+A minimal, zero-bloat Abstract Syntax Tree (AST) analysis library for JavaScript and TypeScript — built for component discovery, documentation pipelines, design systems, and visual tooling.
 
 ---
 
 ## ⚡ What is TreeSift?
 
-TreeSift is a lightweight foundation for code analysis, designed to help understand and map your components, props, and patterns.
+TreeSift helps you understand your code, automatically.
 
-Right now it's simple - but the goal is to turn this into a flexible, extendable, and rock-solid backbone for automated component documentation, intelligent design system integration, and even visual tooling.
+It parses and analyzes component source files, extracting structured metadata — like names, props, hooks, patterns, and design conventions — ready for use in documentation tools, design systems, and UI builders.
+
+Whether you’re mapping a large codebase, generating docs, or creating intelligent design workflows, TreeSift is designed to be the foundation.
 
 ---
 
-## ✅ Current Features
+## ✅ Features
 
-| Capability             | Description                                                                    |
-| ---------------------- | ------------------------------------------------------------------------------ |
-| `Component Name`       | Detects functional or class component names.                                   |
-| `Props Detection`      | Lists typed or directly declared props.                                        |
-| `React Hook Detection` | Detects hooks like `useState`, `useEffect`, `useMemo` etc.                     |
-| `CVA Config Detection` | Identifies `class-variance-authority` (CVA) style configs.                     |
-| `ClassNames Utility`   | Detects usage of `cn`, `clsx`, or `classNames` utilities.                      |
-| `Styling Library`      | Identifies which styling approach is being used (Tailwind, CSS Modules, etc.). |
-| `Imports / Exports`    | Resolves imports and exports from your component files.                        |
-| `JSX Elements`         | Lists JSX elements used within your component's render tree.                   |
+| Capability                   | Description                                                                |
+| ----------------------------- | -------------------------------------------------------------------------- |
+| 🏷 **Component Name Detection**    | Detects functional and class-based component names.                  |
+| 🧾 **Props Detection**             | Lists typed or directly declared props.                              |
+| ⚓ **React Hook Detection**        | Detects usage of hooks like `useState`, `useEffect`, `useMemo`, etc.  |
+| 🎛 **CVA Config Detection**        | Identifies `class-variance-authority` (CVA) style configs.            |
+| 🎨 **ClassNames Utility Detection**| Detects `clsx`, `cn`, or `classNames` utility usage.                  |
+| 🧵 **Styling Library Detection**   | Identifies styling approaches like Tailwind, CSS Modules, etc.        |
+| 📦 **Import / Export Resolution**  | Resolves component imports and exports.                               |
+| 🧱 **JSX Element Detection**       | Lists JSX elements used in your component's render tree.              |
 
 ---
 
 ## 🧠 Designed For
 
-TreeSift is being built to support a wide range of workflows, including:
+- 📚 **Documentation Generators**  
+- 🧩 **Design System Metadata Extraction**  
+- 🔬 **Static Code Analysis**  
+- ⚡ **Visual UI Builders & Render Engines**  
 
-- 📚 **Documentation Generators**
-- 🧩 **Design System Metadata Extraction**
-- 🔬 **Static Code Analysis**
-- ⚡ **Visual UI Builders**
-
-While still early, the goal is to make the library smart enough to feed into anything from docs to rendering engines.
+TreeSift is meant to integrate deeply with your development tooling — from pipelines to playgrounds.
 
 ---
 
@@ -72,4 +71,3 @@ console.log(result);
   jsxElements: ['button', 'Icon']
 }
 */
-```

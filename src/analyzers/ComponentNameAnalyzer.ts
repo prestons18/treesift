@@ -1,3 +1,26 @@
+/**
+ * @file Analyzer for detecting React component names
+ * @author Preston Arnold
+ * @license MIT
+ * @repository https://github.com/prestons18/treesift
+ * @created 14/04/24
+ * @lastModified 14/04/24
+ *
+ * Description:
+ * ------------------------------------------------------
+ * ComponentNameAnalyzer is responsible for identifying and extracting component
+ * names from React components. It handles various component declaration patterns
+ * including default exports, named exports, and variable declarations. The analyzer
+ * follows React's component naming convention (must start with uppercase) and
+ * updates the component context with the detected name.
+ *
+ * Usage:
+ * ------------------------------------------------------
+ * const analyzer = new ComponentNameAnalyzer();
+ * analyzer.analyze(ast, componentContext);
+ * console.log(componentContext.name); // "MyComponent"
+ */
+
 import { ASTParser } from "src/parser/ASTParser";
 import * as t from "@babel/types";
 import { BaseAnalyzer } from "./BaseAnalyzer";

@@ -1,3 +1,26 @@
+/**
+ * @file Analyzer for Class Variance Authority (CVA) style configurations
+ * @author Preston Arnold
+ * @license MIT
+ * @repository https://github.com/prestons18/treesift
+ * @created 14/04/24
+ * @lastModified 14/04/24
+ *
+ * Description:
+ * ------------------------------------------------------
+ * CVAAnalyzer detects and analyzes Class Variance Authority (CVA) style configurations
+ * within React components. It identifies CVA function calls, extracts their base styles,
+ * variants, and compound variants, providing a comprehensive view of the component's
+ * styling system. This analyzer is crucial for understanding and documenting
+ * component styling patterns.
+ *
+ * Usage:
+ * ------------------------------------------------------
+ * const analyzer = new CVAAnalyzer();
+ * analyzer.analyze(ast, componentContext);
+ * console.log(componentContext.cvaConfigs); // Array of CVA configurations
+ */
+
 import { ASTParser } from "src/parser/ASTParser";
 import * as t from "@babel/types";
 import { BaseAnalyzer } from "./BaseAnalyzer";

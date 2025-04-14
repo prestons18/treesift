@@ -1,3 +1,26 @@
+/**
+ * @file Analyzer for className utility functions (cn, clsx, classNames)
+ * @author Preston Arnold
+ * @license MIT
+ * @repository https://github.com/prestons18/treesift
+ * @created 14/04/24
+ * @lastModified 14/04/24
+ *
+ * Description:
+ * ------------------------------------------------------
+ * ClassNamesAnalyzer detects and analyzes the usage of className utility functions
+ * like cn, clsx, and classNames in React components. It tracks imports, usage locations,
+ * and extracts the actual class names being used, including support for conditional
+ * classes, template literals, and nested utility calls. This analyzer is essential
+ * for understanding component styling patterns and class name composition.
+ *
+ * Usage:
+ * ------------------------------------------------------
+ * const analyzer = new ClassNamesAnalyzer();
+ * analyzer.analyze(ast, componentContext);
+ * console.log(componentContext.classNames); // { importSource, importName, usages }
+ */
+
 import { ASTParser } from "src/parser/ASTParser";
 import * as t from "@babel/types";
 import { BaseAnalyzer } from "./BaseAnalyzer";

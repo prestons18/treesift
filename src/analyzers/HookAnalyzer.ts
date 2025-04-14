@@ -1,3 +1,25 @@
+/**
+ * @file Analyzer for detecting React hooks usage
+ * @author Preston Arnold
+ * @license MIT
+ * @repository https://github.com/prestons18/treesift
+ * @created 14/04/24
+ * @lastModified 14/04/24
+ *
+ * Description:
+ * ------------------------------------------------------
+ * HookAnalyzer identifies and analyzes the usage of React hooks within components.
+ * It detects both built-in React hooks (useState, useEffect, etc.) and custom hooks
+ * that follow the 'use' prefix convention. The analyzer extracts hook names and their
+ * arguments, providing insights into component state management and side effects.
+ *
+ * Usage:
+ * ------------------------------------------------------
+ * const analyzer = new HookAnalyzer();
+ * analyzer.analyze(ast, componentContext);
+ * console.log(componentContext.hooks); // Array of { name, arguments }
+ */
+
 import { ASTParser } from "src/parser/ASTParser";
 import * as t from "@babel/types";
 import { BaseAnalyzer } from "./BaseAnalyzer";
@@ -39,7 +61,7 @@ export class HookAnalyzer extends BaseAnalyzer {
                 return "() => {...}";
               }
               return "...";
-            })
+            }) // As you can see, this minifies the expressions
             .filter((arg: string | null): arg is string => arg !== null);
 
           hooks.push({

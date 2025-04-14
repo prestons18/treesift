@@ -1,3 +1,25 @@
+/**
+ * @file Analyzer for detecting React component props
+ * @author Preston Arnold
+ * @license MIT
+ * @repository https://github.com/prestons18/treesift
+ * @created 14/04/24
+ * @lastModified 14/04/24
+ *
+ * Description:
+ * ------------------------------------------------------
+ * PropAnalyzer identifies and analyzes props used within React components. It detects
+ * props through various patterns including direct props access, destructured parameters,
+ * and variable declarations. The analyzer provides insights into component interfaces
+ * and prop usage patterns, which is crucial for documentation and type inference.
+ *
+ * Usage:
+ * ------------------------------------------------------
+ * const analyzer = new PropAnalyzer();
+ * analyzer.analyze(ast, componentContext);
+ * console.log(componentContext.props); // Array of { name, type, isOptional }
+ */
+
 import { ASTParser } from "src/parser/ASTParser";
 import * as t from "@babel/types";
 import { BaseAnalyzer } from "./BaseAnalyzer";

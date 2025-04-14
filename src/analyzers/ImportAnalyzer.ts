@@ -1,3 +1,25 @@
+/**
+ * @file Analyzer for detecting import statements
+ * @author Preston Arnold
+ * @license MIT
+ * @repository https://github.com/prestons18/treesift
+ * @created 14/04/24
+ * @lastModified 14/04/24
+ *
+ * Description:
+ * ------------------------------------------------------
+ * ImportAnalyzer identifies and tracks import statements within React components.
+ * It collects information about external package dependencies and internal module
+ * imports, which is essential for understanding component dependencies and
+ * building dependency graphs.
+ *
+ * Usage:
+ * ------------------------------------------------------
+ * const analyzer = new ImportAnalyzer();
+ * analyzer.analyze(ast, componentContext);
+ * console.log(componentContext.dependencies.packages); // Array of import sources
+ */
+
 import { ASTParser } from "src/parser/ASTParser";
 import * as t from "@babel/types";
 import { BaseAnalyzer } from "./BaseAnalyzer";
