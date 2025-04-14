@@ -4,7 +4,7 @@
   "description": "A powerful JavaScript/TypeScript AST analysis library for React components and beyond",
   "license": "MIT",
   "author": "Preston Arnold",
-  "type": "commonjs",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -23,11 +23,11 @@
   },
   "dependencies": {
     "@babel/parser": "^7.27.0",
+    "@babel/traverse": "^7.27.0",
     "@babel/types": "^7.27.0",
     "chalk": "^5.4.1"
   },
   "devDependencies": {
-    "@babel/traverse": "^7.27.0",
     "@types/babel__traverse": "^7.20.7",
     "@types/jest": "^29.5.12",
     "@types/node": "^22.14.1",

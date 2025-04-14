@@ -21,7 +21,7 @@
  * console.log(componentContext.classNames); // { importSource, importName, usages }
  */
 
-import { ASTParser } from 'src/parser/ASTParser';
+import { ASTParser } from '../parser/ASTParser';
 import * as t from '@babel/types';
 import { BaseAnalyzer } from './BaseAnalyzer';
 import { ComponentContext } from '../context/ComponentContext';

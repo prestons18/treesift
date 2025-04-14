@@ -21,7 +21,7 @@
  * console.log(componentContext.exportType); // "default" or "named"
  */
 
-import { ASTParser } from 'src/parser/ASTParser';
+import { ASTParser } from '../parser/ASTParser';
 import * as t from '@babel/types';
 import { BaseAnalyzer } from './BaseAnalyzer';
 import { ComponentContext } from '../context/ComponentContext';

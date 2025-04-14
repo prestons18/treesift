@@ -20,7 +20,7 @@
  * console.log(componentContext.dependencies.components); // Array of component details
  */
 
-import { ASTParser } from 'src/parser/ASTParser';
+import { ASTParser } from '../parser/ASTParser';
 import * as t from '@babel/types';
 import { BaseAnalyzer } from './BaseAnalyzer';
 import { ComponentContext, JSXElementInfo } from '../context/ComponentContext';
