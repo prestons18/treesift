@@ -1,0 +1,22 @@
+{
+  "name": "treesift",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@babel/parser": "^7.27.0",
+    "@babel/types": "^7.27.0"
+  },
+  "devDependencies": {
+    "@babel/traverse": "^7.27.0",
+    "@types/babel__traverse": "^7.20.7",
+    "@types/node": "^22.14.1",
+    "typescript": "^5.8.3"
+  }
+}
