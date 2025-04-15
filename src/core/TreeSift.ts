@@ -24,7 +24,7 @@ import { CVAAnalyzer } from '../analyzers/CVAAnalyzer';
 import { ClassNamesAnalyzer } from '../analyzers/ClassNamesAnalyzer';
 import { StylingLibraryAnalyzer } from '../analyzers/StylingLibraryAnalyzer';
 import { ComponentNameAnalyzer } from '../analyzers/ComponentNameAnalyzer';
-import { ComponentContext } from '../context/ComponentContext';
+import { ComponentContext, createComponentContext } from '../context/ComponentContext';
 import { ASTParser } from '../parser/ASTParser';
 
 export class TreeSift {
@@ -34,8 +34,11 @@ export class TreeSift {
    * @returns ComponentContext with analysis results
    */
   static analyze(filePath: string): ComponentContext {
-    // In a real implementation, this would read the file
-    // For now, we'll use the example code
+    // Create a component context to store analysis results
+    const context = createComponentContext(filePath);
+
+    // For demonstration purposes, we'll use example code
+    // In a real implementation, this would read from the actual file
     const code = `
 import React, { useState, useEffect } from "react";
 import CustomHook from "./hooks/useCustom";
@@ -64,7 +67,8 @@ const buttonVariants = cva(
   }
 );
 
-export const MyComponent = (props) => {
+// Function declaration component
+export function MyComponent(props) {
     const [count, setCount] = useState(0);
     const result = CustomHook(props.data);
     const buttonClass = cn(
@@ -88,40 +92,28 @@ export const MyComponent = (props) => {
     );
 }
 
+// Arrow function component
+export const ArrowComponent = (props) => {
+    return <div>Arrow Function Component</div>;
+};
+
+// Function expression component
+export const ExpressionComponent = function(props) {
+    return <div>Function Expression Component</div>;
+};
+
+// Class component
+export class ClassComponent extends React.Component {
+    render() {
+        return <div>Class Component</div>;
+    }
+}
+
 export default MyComponent;
 `;
 
     // Parse the code into an AST
     const ast = ASTParser.parseCode(code);
-
-    // Create a component context to store analysis results
-    const context: ComponentContext = {
-      name: 'Unknown',
-      filePath: filePath,
-      exportType: 'default',
-      props: [],
-      hooks: [],
-      cvaConfigs: [],
-      contexts: {
-        consumes: [],
-        provides: [],
-      },
-      dependencies: {
-        components: [],
-        packages: [],
-      },
-      hocWrappers: [],
-      classNames: {
-        importSource: null,
-        importName: null,
-        usages: [],
-      },
-      stylingLibrary: {
-        type: 'unknown',
-        confidence: 0,
-        indicators: [],
-      },
-    };
 
     // Run all analyzers
     const componentNameAnalyzer = new ComponentNameAnalyzer();

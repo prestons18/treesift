@@ -66,6 +66,13 @@ export interface ComponentContext {
   filePath: string; // Relative path to source file
   /** Whether the component is exported as default or named export */
   exportType: 'default' | 'named'; // Export style
+  /** The type of component declaration (FunctionDeclaration, ArrowFunctionExpression, etc.) */
+  type:
+    | 'FunctionDeclaration'
+    | 'ArrowFunctionExpression'
+    | 'FunctionExpression'
+    | 'ClassDeclaration'
+    | 'Unknown';
 
   /** Array of props used by the component */
   props: {
@@ -151,5 +158,41 @@ export interface ComponentContext {
     line: number;
     /** Column number */
     column: number;
+  };
+}
+
+/**
+ * Creates a new ComponentContext with default values
+ * @param filePath - The path to the component file
+ * @returns A new ComponentContext with default values
+ */
+export function createComponentContext(filePath: string): ComponentContext {
+  return {
+    name: 'Unknown',
+    filePath,
+    exportType: 'named',
+    type: 'Unknown',
+    props: [],
+    hooks: [],
+    cvaConfigs: [],
+    classNames: {
+      importSource: null,
+      importName: null,
+      usages: [],
+    },
+    dependencies: {
+      components: [],
+      packages: [],
+    },
+    contexts: {
+      consumes: [],
+      provides: [],
+    },
+    hocWrappers: [],
+    stylingLibrary: {
+      type: 'unknown',
+      confidence: 0,
+      indicators: [],
+    },
   };
 }

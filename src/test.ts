@@ -8,6 +8,9 @@
  * @lastModified 14/04/24
  */
 
+import type { Console } from 'console';
+declare const console: Console; // lmao
+
 import { TreeSift } from './index';
 import chalk from 'chalk';
 
@@ -31,20 +34,20 @@ const colors = {
 
 // Helper functions for formatting
 const format = {
-  separator: (length = 50) => colors.separator('─'.repeat(length)),
-  title: (text: string) => `\n${colors.title(`📊 ${text}`)}`,
-  subtitle: (text: string) => `\n${colors.subtitle(`🔍 ${text}`)}`,
-  keyValue: (key: string, value: string) => `${colors.label(key)}: ${colors.value(value)}`,
-  listItem: (index: number, text: string) => `${colors.component(`  ${index}. ${text}`)}`,
-  warning: (text: string) => colors.warning(`  ${text}`),
-  treeItem: (indent: number, isLast: boolean, text: string) => {
+  separator: (length = 50): string => colors.separator('─'.repeat(length)),
+  title: (text: string): string => `\n${colors.title(`📊 ${text}`)}`,
+  subtitle: (text: string): string => `\n${colors.subtitle(`🔍 ${text}`)}`,
+  keyValue: (key: string, value: string): string => `${colors.label(key)}: ${colors.value(value)}`,
+  listItem: (index: number, text: string): string => `${colors.component(`  ${index}. ${text}`)}`,
+  warning: (text: string): string => colors.warning(`  ${text}`),
+  treeItem: (indent: number, isLast: boolean, text: string): string => {
     const prefix = indent > 0 ? (isLast ? '└─' : '├─') : '';
     return '  '.repeat(indent) + prefix + ' ' + text;
   },
 };
 
 // Test the TreeSift analyzer
-const result = TreeSift.analyze('src/components/MyComponent.tsx');
+const result = TreeSift.analyze('src/components/MyComponent.tsx'); // Value is hardcoded
 
 // Output the results
 console.log('\n' + colors.highlight('🌳 TreeSift Component Analysis'));
@@ -54,6 +57,7 @@ console.log(format.separator(50));
 console.log(format.title('Component Overview'));
 console.log(format.separator());
 console.log(format.keyValue('Name', result.name));
+console.log(format.keyValue('Type', result.type));
 console.log(format.keyValue('Export Type', result.exportType));
 console.log(format.keyValue('File Path', result.filePath));
 
@@ -130,7 +134,7 @@ console.log(format.title('JSX Structure'));
 console.log(format.separator());
 if (result.dependencies.components.length > 0) {
   // Create a tree-like structure for JSX elements
-  const renderJSXTree = (elements: typeof result.dependencies.components, level = 0) => {
+  const renderJSXTree = (elements: typeof result.dependencies.components, level = 0): void => {
     elements.forEach((element, index) => {
       const isLast = index === elements.length - 1;
       console.log(format.treeItem(level, isLast, colors.component(element.name)));
