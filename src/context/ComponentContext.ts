@@ -172,7 +172,7 @@ export interface ComponentContext {
   /** Styling library information */
   stylingLibrary: {
     /** Type of styling library used */
-    type: 'tailwind' | 'styled-components' | 'emotion' | 'unknown';
+    type: 'tailwind' | 'styled-components' | 'emotion' | 'cva' | 'unknown';
     /** Confidence score of the detection */
     confidence: number;
     /** Indicators that led to the detection */

@@ -4,7 +4,7 @@
  * @license MIT
  * @repository https://github.com/prestons18/treesift
  * @created 14/04/24
- * @lastModified 14/04/24
+ * @lastModified 15/04/24
  *
  * Description:
  * ------------------------------------------------------
@@ -26,7 +26,7 @@ import * as t from '@babel/types';
 import { BaseAnalyzer } from './BaseAnalyzer';
 import { ComponentContext } from '../context/ComponentContext';
 
-type StylingLibrary = 'tailwind' | 'styled-components' | 'emotion' | 'unknown';
+type StylingLibrary = 'tailwind' | 'styled-components' | 'emotion' | 'cva' | 'unknown';
 
 interface StylingScore {
   score: number;
@@ -64,8 +64,42 @@ export class StylingLibraryAnalyzer extends BaseAnalyzer {
       ['tailwind', { score: 0, indicators: [] }],
       ['styled-components', { score: 0, indicators: [] }],
       ['emotion', { score: 0, indicators: [] }],
+      ['cva', { score: 0, indicators: [] }],
       ['unknown', { score: 0, indicators: [] }],
     ]);
+
+    // Check for CVA configs first
+    if (context.cvaConfigs && context.cvaConfigs.length > 0) {
+      const cvaScore = scores.get('cva')!;
+      cvaScore.score += 100; // High score since CVA is explicitly used
+      cvaScore.indicators.push(`Found ${context.cvaConfigs.length} CVA configuration(s)`);
+
+      // Check for Tailwind in CVA configs
+      const tailwindScore = scores.get('tailwind')!;
+      context.cvaConfigs.forEach(config => {
+        cvaScore.indicators.push(`CVA config: ${config.variableName}`);
+
+        // Parse the config object to check for Tailwind classes
+        try {
+          const configObj = JSON.parse(config.configObject);
+          const hasTailwindClasses = this.hasTailwindClasses(configObj);
+          if (hasTailwindClasses) {
+            tailwindScore.score += 50;
+            tailwindScore.indicators.push(
+              `Found Tailwind classes in CVA config: ${config.variableName}`
+            );
+          }
+        } catch {
+          // If parsing fails, try checking the raw string
+          if (this.TAILWIND_CLASS_PATTERNS.some(pattern => config.configObject.includes(pattern))) {
+            tailwindScore.score += 50;
+            tailwindScore.indicators.push(
+              `Found Tailwind classes in CVA config: ${config.variableName}`
+            );
+          }
+        }
+      });
+    }
 
     ASTParser.traverseAST(node, path => {
       this.analyzeImports(path.node, scores);
@@ -77,7 +111,7 @@ export class StylingLibraryAnalyzer extends BaseAnalyzer {
     const [detectedType, confidence] = this.calculateConfidence(scores);
 
     context.stylingLibrary = {
-      type: detectedType,
+      type: detectedType as ComponentContext['stylingLibrary']['type'],
       confidence,
       indicators: scores.get(detectedType)?.indicators || ['No clear styling indicators found'],
     };
@@ -157,11 +191,19 @@ export class StylingLibraryAnalyzer extends BaseAnalyzer {
   private calculateConfidence(scores: Map<StylingLibrary, StylingScore>): [StylingLibrary, number] {
     let maxScore = 0;
     let detectedType: StylingLibrary = 'unknown';
+    let secondaryType: StylingLibrary | null = null;
+    let secondaryScore = 0;
 
+    // First pass: find the highest and second highest scores
     for (const [type, { score }] of scores.entries()) {
       if (score > maxScore) {
+        secondaryScore = maxScore;
+        secondaryType = detectedType;
         maxScore = score;
         detectedType = type;
+      } else if (score > secondaryScore) {
+        secondaryScore = score;
+        secondaryType = type;
       }
     }
 
@@ -173,10 +215,31 @@ export class StylingLibraryAnalyzer extends BaseAnalyzer {
     // Boost confidence based on number of indicators
     confidence = Math.min(100, confidence + indicatorCount * 15);
 
-    // Ensure minimum confidence based on indicator count
-    if (indicatorCount >= 4) confidence = Math.max(confidence, 95);
-    else if (indicatorCount >= 3) confidence = Math.max(confidence, 85);
+    // If we have a strong secondary library (score > 50), reduce confidence
+    if (secondaryType && secondaryScore > 50) {
+      confidence = Math.max(60, Math.min(confidence, 80));
+      // Add indicator about multiple libraries
+      const indicators = scores.get(detectedType)?.indicators || [];
+      indicators.push(`Also using ${secondaryType} (score: ${secondaryScore})`);
+      scores.set(detectedType, { score: maxScore, indicators });
+    }
 
     return [detectedType, Math.round(confidence)];
+  }
+
+  private hasTailwindClasses(obj: any): boolean {
+    if (typeof obj === 'string') {
+      return this.TAILWIND_CLASS_PATTERNS.some(pattern => obj.includes(pattern));
+    }
+
+    if (Array.isArray(obj)) {
+      return obj.some(item => this.hasTailwindClasses(item));
+    }
+
+    if (obj && typeof obj === 'object') {
+      return Object.values(obj).some(value => this.hasTailwindClasses(value));
+    }
+
+    return false;
   }
 }

@@ -4,7 +4,7 @@
  * @license MIT
  * @repository https://github.com/prestons18/treesift
  * @created 14/04/24
- * @lastModified 14/04/24
+ * @lastModified 15/04/24
  *
  * Description:
  * ------------------------------------------------------
