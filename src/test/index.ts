@@ -15,7 +15,7 @@ declare const console: {
   info: (...args: any[]) => void;
 };
 
-import { TreeSift } from './index';
+import { TreeSift } from '../core/TreeSift';
 import chalk from 'chalk';
 
 // ANSI color codes for terminal output
@@ -51,7 +51,9 @@ const format = {
 };
 
 // Test the TreeSift analyzer
-const result = TreeSift.analyze('test', true); // Value is hardcoded
+const result = TreeSift.analyze('test', true);
+
+// console.log(result);
 
 // Output the results
 console.log('\n' + colors.highlight('🌳 TreeSift Component Analysis'));
@@ -69,7 +71,7 @@ console.log(format.keyValue('File Path', result.filePath));
 console.log(format.subtitle('Props'));
 console.log(format.separator(30));
 if (result.props.length > 0) {
-  result.props.forEach((prop, index) => {
+  result.props.forEach((prop: any, index: number) => {
     console.log(format.listItem(index + 1, `${prop.name}${prop.isOptional ? ' (optional)' : ''}`));
     if (prop.type) console.log(`     ${format.keyValue('Type', prop.type)}`);
     if (prop.defaultValue) console.log(`     ${format.keyValue('Default', prop.defaultValue)}`);
@@ -83,7 +85,7 @@ if (result.props.length > 0) {
 console.log(format.subtitle('Hooks'));
 console.log(format.separator(30));
 if (result.hooks.length > 0) {
-  result.hooks.forEach((hook, index) => {
+  result.hooks.forEach((hook: any, index: number) => {
     console.log(format.listItem(index + 1, hook.name));
     if (hook.arguments?.length) {
       console.log(`     ${format.keyValue('Arguments', hook.arguments.join(', '))}`);
@@ -97,7 +99,7 @@ if (result.hooks.length > 0) {
 console.log(format.subtitle('CVA Configs'));
 console.log(format.separator(30));
 if (result.cvaConfigs.length > 0) {
-  result.cvaConfigs.forEach((config, index) => {
+  result.cvaConfigs.forEach((config: any, index: number) => {
     console.log(format.listItem(index + 1, config.variableName));
     console.log(`     ${format.keyValue('Config', config.configObject)}`);
   });
@@ -116,7 +118,7 @@ console.log(
 );
 if (result.stylingLibrary.indicators.length > 0) {
   console.log(`  ${colors.label('Indicators')}:`);
-  result.stylingLibrary.indicators.forEach((indicator, index) => {
+  result.stylingLibrary.indicators.forEach((indicator: string, index: number) => {
     console.log(`     ${index + 1}. ${colors.value(indicator)}`);
   });
 }
@@ -126,7 +128,7 @@ console.log(format.subtitle('Dependencies'));
 console.log(format.separator(30));
 if (result.dependencies.packages.length > 0) {
   console.log(`  ${colors.label('Packages')}:`);
-  result.dependencies.packages.forEach((pkg, index) => {
+  result.dependencies.packages.forEach((pkg: string, index: number) => {
     console.log(`     ${index + 1}. ${colors.value(pkg)}`);
   });
 } else {
@@ -136,17 +138,17 @@ if (result.dependencies.packages.length > 0) {
 // JSX Elements information
 console.log(format.title('JSX Structure'));
 console.log(format.separator());
-if (result.dependencies.components.length > 0) {
+if (result.jsxStructure.length > 0) {
   // Create a tree-like structure for JSX elements
-  const renderJSXTree = (elements: typeof result.dependencies.components, level = 0): void => {
-    elements.forEach((element, index) => {
+  const renderJSXTree = (elements: typeof result.jsxStructure, level = 0): void => {
+    elements.forEach((element: any, index: number) => {
       const isLast = index === elements.length - 1;
       console.log(format.treeItem(level, isLast, colors.component(element.name)));
 
       // Display props
       if (element.props.length > 0) {
         const propIndent = level + 1;
-        element.props.forEach((prop, propIndex) => {
+        element.props.forEach((prop: any, propIndex: number) => {
           const isLastProp = propIndex === element.props.length - 1;
           const propText = prop.isSpread
             ? colors.prop(`...${prop.name}`)
@@ -158,7 +160,7 @@ if (result.dependencies.components.length > 0) {
       // Display children
       if (element.children.length > 0) {
         const childIndent = level + 1;
-        element.children.forEach((child, childIndex) => {
+        element.children.forEach((child: any, childIndex: number) => {
           const isLastChild = childIndex === element.children.length - 1;
           const childText = `${colors.child(`[${child.type}]`)} ${colors.value(child.content)}`;
           console.log(format.treeItem(childIndent, isLastChild, childText));
@@ -167,7 +169,7 @@ if (result.dependencies.components.length > 0) {
     });
   };
 
-  renderJSXTree(result.dependencies.components);
+  renderJSXTree(result.jsxStructure);
 } else {
   console.log(format.warning('No JSX elements detected'));
 }
@@ -185,7 +187,7 @@ if (result.classNames.importSource) {
 
   if (result.classNames.usages.length > 0) {
     console.log(`\n${colors.subtitle('Usages')}:`);
-    result.classNames.usages.forEach((usage, index) => {
+    result.classNames.usages.forEach((usage: any, index: number) => {
       console.log(`  ${colors.usage(`${index + 1}. Line ${usage.line}, Column ${usage.column}`)}`);
       console.log(`     ${colors.label('Arguments')}: ${colors.value(usage.arguments.join(', '))}`);
     });

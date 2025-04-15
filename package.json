@@ -15,7 +15,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc -w",
-    "test": "tsx src/test.ts",
+    "test": "tsx src/test/index.ts",
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "prepare": "npm run build",

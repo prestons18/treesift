@@ -32,6 +32,13 @@ export class ComponentNameAnalyzer extends BaseAnalyzer {
   category = 'react';
 
   analyze(node: any, context: ComponentContext): void {
+    const result = this.detectComponentInfo(node);
+    context.name = result.name;
+    context.type = result.type;
+  }
+
+  private detectComponentInfo(node: any): { name: string; type: ComponentContext['type'] } {
+    // Initialize with default values
     let componentName = 'Unknown';
     let componentType: ComponentContext['type'] = 'Unknown';
     let isDefaultExport = false;
@@ -54,74 +61,135 @@ export class ComponentNameAnalyzer extends BaseAnalyzer {
       }
     });
 
-    // Second pass: if no default export found or we need to determine type
+    // Second pass: analyze component declarations
     ASTParser.traverseAST(node, path => {
-      // If we found a default export identifier, look for its declaration
+      // If we have a default export, look for its declaration
       if (isDefaultExport && componentType === 'Unknown') {
-        if (
-          t.isVariableDeclarator(path.node) &&
-          t.isIdentifier(path.node.id) &&
-          path.node.id.name === componentName
-        ) {
-          if (t.isArrowFunctionExpression(path.node.init)) {
-            componentType = 'ArrowFunctionExpression';
-          } else if (t.isFunctionExpression(path.node.init)) {
-            componentType = 'FunctionExpression';
-          }
-        } else if (
-          t.isFunctionDeclaration(path.node) &&
-          t.isIdentifier(path.node.id) &&
-          path.node.id.name === componentName
-        ) {
-          componentType = 'FunctionDeclaration';
-        } else if (
-          t.isClassDeclaration(path.node) &&
-          t.isIdentifier(path.node.id) &&
-          path.node.id.name === componentName
-        ) {
-          componentType = 'ClassDeclaration';
+        const result = this.analyzeComponentDeclaration(path.node, componentName);
+        if (result) {
+          componentType = result;
         }
       }
       // If no default export found, look for named exports
       else if (!isDefaultExport) {
-        // Check for named exports that look like components
-        if (
-          t.isExportNamedDeclaration(path.node) &&
-          t.isFunctionDeclaration(path.node.declaration) &&
-          t.isIdentifier(path.node.declaration.id) &&
-          path.node.declaration.id.name.match(/^[A-Z]/)
-        ) {
-          componentName = path.node.declaration.id.name;
-          componentType = 'FunctionDeclaration';
-        }
-
-        // Check for variable declarations with function expressions
-        if (
-          t.isVariableDeclarator(path.node) &&
-          t.isIdentifier(path.node.id) &&
-          path.node.id.name.match(/^[A-Z]/)
-        ) {
-          componentName = path.node.id.name;
-          if (t.isArrowFunctionExpression(path.node.init)) {
-            componentType = 'ArrowFunctionExpression';
-          } else if (t.isFunctionExpression(path.node.init)) {
-            componentType = 'FunctionExpression';
-          }
-        }
-
-        // Check for class declarations
-        if (
-          t.isClassDeclaration(path.node) &&
-          t.isIdentifier(path.node.id) &&
-          path.node.id.name.match(/^[A-Z]/)
-        ) {
-          componentName = path.node.id.name;
-          componentType = 'ClassDeclaration';
+        const result = this.analyzeNamedExport(path.node);
+        if (result) {
+          componentName = result.name;
+          componentType = result.type;
         }
       }
     });
 
-    context.name = componentName;
-    context.type = componentType;
+    return { name: componentName, type: componentType };
+  }
+
+  private analyzeComponentDeclaration(
+    node: any,
+    expectedName: string
+  ): ComponentContext['type'] | null {
+    // Check for variable declarations
+    if (t.isVariableDeclarator(node) && t.isIdentifier(node.id) && node.id.name === expectedName) {
+      if (t.isArrowFunctionExpression(node.init)) {
+        return 'ArrowFunctionExpression';
+      } else if (t.isFunctionExpression(node.init)) {
+        return 'FunctionExpression';
+      } else if (this.isForwardRefCall(node.init)) {
+        return 'ForwardRefComponent';
+      }
+    }
+    // Check for function declarations
+    else if (
+      t.isFunctionDeclaration(node) &&
+      t.isIdentifier(node.id) &&
+      node.id.name === expectedName
+    ) {
+      return 'FunctionDeclaration';
+    }
+    // Check for class declarations
+    else if (
+      t.isClassDeclaration(node) &&
+      t.isIdentifier(node.id) &&
+      node.id.name === expectedName
+    ) {
+      return 'ClassDeclaration';
+    }
+
+    return null;
+  }
+
+  private analyzeNamedExport(node: any): { name: string; type: ComponentContext['type'] } | null {
+    // Check for named exports that look like components
+    if (
+      t.isExportNamedDeclaration(node) &&
+      t.isFunctionDeclaration(node.declaration) &&
+      t.isIdentifier(node.declaration.id) &&
+      node.declaration.id.name.match(/^[A-Z]/)
+    ) {
+      return {
+        name: node.declaration.id.name,
+        type: 'FunctionDeclaration',
+      };
+    }
+
+    // Check for variable declarations with function expressions
+    if (t.isVariableDeclarator(node) && t.isIdentifier(node.id) && node.id.name.match(/^[A-Z]/)) {
+      if (t.isArrowFunctionExpression(node.init)) {
+        return { name: node.id.name, type: 'ArrowFunctionExpression' };
+      } else if (t.isFunctionExpression(node.init)) {
+        return { name: node.id.name, type: 'FunctionExpression' };
+      } else if (this.isForwardRefCall(node.init)) {
+        return { name: node.id.name, type: 'ForwardRefComponent' };
+      }
+    }
+
+    // Check for class declarations
+    if (t.isClassDeclaration(node) && t.isIdentifier(node.id) && node.id.name.match(/^[A-Z]/)) {
+      return { name: node.id.name, type: 'ClassDeclaration' };
+    }
+
+    // Check for forwardRef usage (both React.forwardRef and imported forwardRef)
+    if (this.isForwardRefCall(node)) {
+      // If this is a variable declaration
+      if (
+        t.isVariableDeclarator(node.parentPath?.node) &&
+        t.isIdentifier(node.parentPath.node.id)
+      ) {
+        return { name: node.parentPath.node.id.name, type: 'ForwardRefComponent' };
+      }
+      // If this is a direct export
+      else if (
+        t.isExportNamedDeclaration(node.parentPath?.node) &&
+        t.isVariableDeclaration(node.parentPath.node.declaration)
+      ) {
+        const decl = node.parentPath.node.declaration.declarations[0];
+        if (t.isIdentifier(decl.id)) {
+          return { name: decl.id.name, type: 'ForwardRefComponent' };
+        }
+      }
+    }
+
+    return null;
+  }
+
+  private isForwardRefCall(node: any): boolean {
+    if (!t.isCallExpression(node)) return false;
+
+    // Check for React.forwardRef
+    if (
+      t.isMemberExpression(node.callee) &&
+      t.isIdentifier(node.callee.object) &&
+      t.isIdentifier(node.callee.property) &&
+      node.callee.object.name === 'React' &&
+      node.callee.property.name === 'forwardRef'
+    ) {
+      return true;
+    }
+
+    // Check for imported forwardRef
+    if (t.isIdentifier(node.callee) && node.callee.name === 'forwardRef') {
+      return true;
+    }
+
+    return false;
   }
 }

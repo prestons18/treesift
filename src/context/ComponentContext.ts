@@ -72,6 +72,7 @@ export interface ComponentContext {
     | 'ArrowFunctionExpression'
     | 'FunctionExpression'
     | 'ClassDeclaration'
+    | 'ForwardRefComponent'
     | 'Unknown';
 
   /** Array of props used by the component */
@@ -121,13 +122,41 @@ export interface ComponentContext {
     }>;
   };
 
+  /** Enhanced information about className utility usage */
+  classNamesUsage: {
+    /** Whether the component uses a className utility */
+    hasClassNames: boolean;
+    /** Source of the className utility import */
+    importSource: string;
+    /** Usage of the className utility */
+    usage: Array<{
+      /** Type of utility (cn, clsx, classnames) */
+      type: 'cn' | 'clsx' | 'classnames';
+      /** Arguments passed to the utility */
+      arguments: Array<{
+        /** Type of argument */
+        type: 'string' | 'object' | 'array' | 'identifier' | 'conditional' | 'call' | 'unknown';
+        /** Value of the argument */
+        value: any;
+      }>;
+      /** Location of the usage in the source file */
+      location: {
+        /** Line number */
+        line: number;
+        /** Column number */
+        column: number;
+      };
+    }>;
+  };
+
   /** Dependencies of the component */
   dependencies: {
-    /** Components used in the JSX */
-    components: JSXElementInfo[];
     /** Package imports */
     packages: string[];
   };
+
+  /** JSX structure of the component */
+  jsxStructure: JSXElementInfo[];
 
   /** Context providers and consumers */
   contexts: {
@@ -180,10 +209,15 @@ export function createComponentContext(filePath: string): ComponentContext {
       importName: null,
       usages: [],
     },
+    classNamesUsage: {
+      hasClassNames: false,
+      importSource: '',
+      usage: [],
+    },
     dependencies: {
-      components: [],
       packages: [],
     },
+    jsxStructure: [],
     contexts: {
       consumes: [],
       provides: [],

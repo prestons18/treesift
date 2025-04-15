@@ -11,14 +11,7 @@
  * ClassNamesAnalyzer detects and analyzes the usage of className utility functions
  * like cn, clsx, and classNames in React components. It tracks imports, usage locations,
  * and extracts the actual class names being used, including support for conditional
- * classes, template literals, and nested utility calls. This analyzer is essential
- * for understanding component styling patterns and class name composition.
- *
- * Usage:
- * ------------------------------------------------------
- * const analyzer = new ClassNamesAnalyzer();
- * analyzer.analyze(ast, componentContext);
- * console.log(componentContext.classNames); // { importSource, importName, usages }
+ * classes, template literals, and nested utility calls.
  */
 
 import { ASTParser } from '../parser/ASTParser';
@@ -26,152 +19,199 @@ import * as t from '@babel/types';
 import { BaseAnalyzer } from './BaseAnalyzer';
 import { ComponentContext } from '../context/ComponentContext';
 
+type ClassNameArgType =
+  | 'string'
+  | 'object'
+  | 'array'
+  | 'identifier'
+  | 'conditional'
+  | 'unknown'
+  | 'call';
+
+interface ClassNameArg {
+  type: ClassNameArgType;
+  value: any;
+}
+
+interface Location {
+  line: number;
+  column: number;
+}
+
 export class ClassNamesAnalyzer extends BaseAnalyzer {
   name = 'ClassNamesAnalyzer';
-  description = 'Analyzes classNames utility (cn) usage in components';
+  description = 'Analyzes className utility usage in components';
   category = 'styling';
 
   analyze(node: any, context: ComponentContext): void {
-    const cnInfo: {
-      importSource: string | null;
-      importName: string | null;
-      usages: Array<{
-        line: number;
-        column: number;
-        arguments: string[];
-      }>;
-    } = {
-      importSource: null,
-      importName: null,
-      usages: [],
+    // Initialize with default values
+    context.classNamesUsage = {
+      hasClassNames: false,
+      importSource: '',
+      usage: [],
     };
 
+    // Track imported utilities
+    const importedUtils = new Map<string, string>();
+
+    // First pass: collect all imported utilities
     ASTParser.traverseAST(node, path => {
-      // Detect cn import
       if (t.isImportDeclaration(path.node)) {
         const source = path.node.source.value;
-        if (
-          typeof source === 'string' &&
-          (source.includes('clsx') ||
-            source.includes('classnames') ||
-            source.includes('tailwind-merge'))
-        ) {
-          path.node.specifiers.forEach((specifier: any) => {
-            if (
-              t.isImportSpecifier(specifier) &&
-              t.isIdentifier(specifier.local) &&
-              (specifier.local.name === 'cn' ||
-                specifier.local.name === 'clsx' ||
-                specifier.local.name === 'classNames')
-            ) {
-              cnInfo.importSource = source;
-              cnInfo.importName = specifier.local.name;
+        if (typeof source === 'string') {
+          path.node.specifiers.forEach(
+            (spec: t.ImportSpecifier | t.ImportDefaultSpecifier | t.ImportNamespaceSpecifier) => {
+              if (t.isImportSpecifier(spec)) {
+                const importedName = t.isIdentifier(spec.imported) ? spec.imported.name : '';
+                const localName = spec.local.name;
+                if (['cn', 'clsx', 'classnames', 'cx'].includes(importedName)) {
+                  importedUtils.set(localName, source);
+                  context.classNamesUsage.hasClassNames = true;
+                  context.classNamesUsage.importSource = source;
+                }
+              }
             }
-          });
+          );
         }
-      }
-
-      // Detect cn usage
-      if (
-        t.isCallExpression(path.node) &&
-        t.isIdentifier(path.node.callee) &&
-        (path.node.callee.name === 'cn' ||
-          path.node.callee.name === 'clsx' ||
-          path.node.callee.name === 'classNames')
-      ) {
-        const args = this.extractArguments(path.node.arguments);
-
-        cnInfo.usages.push({
-          line: path.node.loc?.start.line || 0,
-          column: path.node.loc?.start.column || 0,
-          arguments: args,
-        });
       }
     });
 
-    // Store results in context
-    context.classNames = cnInfo;
-  }
-
-  private extractArguments(args: any[]): string[] {
-    return args
-      .map(arg => {
-        // String literals
+    // Helper function to extract arguments from a call expression
+    const extractArgs = (callExpr: t.CallExpression): ClassNameArg[] => {
+      return callExpr.arguments.map(arg => {
         if (t.isStringLiteral(arg)) {
-          return arg.value;
-        }
+          return { type: 'string', value: arg.value };
+        } else if (t.isTemplateLiteral(arg)) {
+          return { type: 'string', value: arg.quasis.map(q => q.value.raw).join('') };
+        } else if (t.isObjectExpression(arg)) {
+          const obj: Record<string, any> = {};
+          arg.properties.forEach(prop => {
+            if (t.isObjectProperty(prop) && t.isIdentifier(prop.key)) {
+              obj[prop.key.name] = t.isBooleanLiteral(prop.value)
+                ? prop.value.value
+                : t.isStringLiteral(prop.value)
+                  ? prop.value.value
+                  : true;
+            }
+          });
+          return { type: 'object', value: obj };
+        } else if (t.isArrayExpression(arg)) {
+          return {
+            type: 'array',
+            value: arg.elements
+              .map(el => (t.isStringLiteral(el) ? el.value : t.isIdentifier(el) ? el.name : null))
+              .filter(Boolean),
+          };
+        } else if (t.isIdentifier(arg)) {
+          return { type: 'identifier', value: arg.name };
+        } else if (t.isConditionalExpression(arg)) {
+          const test = t.isBinaryExpression(arg.test)
+            ? `${t.isIdentifier(arg.test.left) ? arg.test.left.name : ''} ${arg.test.operator} ${t.isNumericLiteral(arg.test.right) ? arg.test.right.value : ''}`
+            : t.isIdentifier(arg.test)
+              ? arg.test.name
+              : '';
 
-        // Template literals
-        if (t.isTemplateLiteral(arg)) {
-          return arg.quasis.map((q: any) => q.value.raw).join('');
-        }
+          const consequent = t.isStringLiteral(arg.consequent)
+            ? arg.consequent.value
+            : t.isIdentifier(arg.consequent)
+              ? arg.consequent.name
+              : '';
 
-        // Conditional expressions
-        if (t.isConditionalExpression(arg)) {
-          const condition = this.extractCondition(arg.test);
-          const consequent = this.extractArguments([arg.consequent])[0];
-          const alternate = this.extractArguments([arg.alternate])[0];
-          return [`${condition} ? ${consequent} : ${alternate}`];
-        }
+          const alternate = t.isStringLiteral(arg.alternate)
+            ? arg.alternate.value
+            : t.isIdentifier(arg.alternate)
+              ? arg.alternate.name
+              : '';
 
-        // Array expressions
-        if (t.isArrayExpression(arg)) {
-          return this.extractArguments(arg.elements);
+          return {
+            type: 'conditional',
+            value: { condition: test, trueValue: consequent, falseValue: alternate },
+          };
         }
+        return { type: 'unknown', value: '' };
+      });
+    };
 
-        // Object expressions (for conditional classes)
-        if (t.isObjectExpression(arg)) {
-          return arg.properties
-            .map((prop: any) => {
-              if (t.isObjectProperty(prop) && t.isIdentifier(prop.key)) {
-                return `${prop.key.name}: ${
-                  t.isBooleanLiteral(prop.value) ? prop.value.value : 'true'
-                }`;
-              }
-              return '';
-            })
-            .filter(Boolean);
-        }
+    // Helper function to process a className utility call
+    const processClassNameCall = (
+      callExpr: t.CallExpression,
+      calleeName: string,
+      location: Location
+    ): void => {
+      if (
+        ['cn', 'clsx', 'classnames', 'cx'].includes(calleeName) ||
+        importedUtils.has(calleeName)
+      ) {
+        context.classNamesUsage.hasClassNames = true;
+        const typeForContext = importedUtils.has(calleeName)
+          ? 'cn'
+          : calleeName === 'cn'
+            ? 'cn'
+            : calleeName === 'clsx'
+              ? 'clsx'
+              : 'classnames';
 
-        // Function calls (for nested cn calls)
+        context.classNamesUsage.usage.push({
+          type: typeForContext,
+          arguments: extractArgs(callExpr),
+          location,
+        });
+      }
+    };
+
+    // Second pass: find usages
+    ASTParser.traverseAST(node, path => {
+      // Check for direct usage of className utilities
+      if (t.isCallExpression(path.node) && t.isIdentifier(path.node.callee)) {
+        const location = path.node.loc
+          ? { line: path.node.loc.start.line, column: path.node.loc.start.column }
+          : { line: 0, column: 0 };
+        processClassNameCall(path.node, path.node.callee.name, location);
+      }
+
+      // Check for JSX className attributes that use className utilities
+      if (
+        t.isJSXAttribute(path.node) &&
+        t.isJSXIdentifier(path.node.name) &&
+        path.node.name.name === 'className'
+      ) {
         if (
-          t.isCallExpression(arg) &&
-          t.isIdentifier(arg.callee) &&
-          (arg.callee.name === 'cn' ||
-            arg.callee.name === 'clsx' ||
-            arg.callee.name === 'classNames')
+          t.isJSXExpressionContainer(path.node.value) &&
+          t.isCallExpression(path.node.value.expression) &&
+          t.isIdentifier(path.node.value.expression.callee)
         ) {
-          return this.extractArguments(arg.arguments);
+          const location = path.node.loc
+            ? { line: path.node.loc.start.line, column: path.node.loc.start.column }
+            : { line: 0, column: 0 };
+          processClassNameCall(
+            path.node.value.expression,
+            path.node.value.expression.callee.name,
+            location
+          );
         }
+      }
+    });
 
-        // Default case - try to get a string representation
-        return String(arg);
-      })
-      .flat()
-      .filter(Boolean);
-  }
-
-  private extractCondition(test: any): string {
-    if (t.isBinaryExpression(test)) {
-      const left = t.isIdentifier(test.left)
-        ? test.left.name
-        : t.isMemberExpression(test.left)
-          ? this.extractMemberExpression(test.left)
-          : String(test.left);
-      const right = t.isNumericLiteral(test.right)
-        ? test.right.value
-        : t.isStringLiteral(test.right)
-          ? `"${test.right.value}"`
-          : String(test.right);
-      return `${left} ${test.operator} ${right}`;
+    // Update the legacy classNames property for backward compatibility
+    if (context.classNamesUsage.hasClassNames) {
+      context.classNames = {
+        importSource: context.classNamesUsage.importSource,
+        importName:
+          context.classNamesUsage.usage.length > 0 ? context.classNamesUsage.usage[0].type : null,
+        usages: context.classNamesUsage.usage.map(usage => ({
+          line: usage.location.line,
+          column: usage.location.column,
+          arguments: usage.arguments.map(arg => {
+            if (arg.type === 'conditional') {
+              return `${arg.value.condition} ? "${arg.value.trueValue}" : "${arg.value.falseValue}"`;
+            } else if (typeof arg.value === 'string') {
+              return arg.value;
+            } else {
+              return JSON.stringify(arg.value);
+            }
+          }),
+        })),
+      };
     }
-    return String(test);
-  }
-
-  private extractMemberExpression(node: any): string {
-    if (t.isIdentifier(node.object) && t.isIdentifier(node.property)) {
-      return `${node.object.name}.${node.property.name}`;
-    }
-    return String(node);
   }
 }

@@ -78,7 +78,8 @@ export class JSXElementAnalyzer extends BaseAnalyzer {
       elements.set(elementName, elementInfo);
     });
 
-    context.dependencies.components = Array.from(elements.values());
+    // Store results in context
+    context.jsxStructure = Array.from(elements.values());
   }
 
   private extractPropValue(value: t.JSXAttribute['value']): string | null {
