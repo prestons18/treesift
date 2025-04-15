@@ -51,7 +51,7 @@ const format = {
 };
 
 // Test the TreeSift analyzer
-const result = TreeSift.analyze('src/components/MyComponent.tsx'); // Value is hardcoded
+const result = TreeSift.analyze('test', true); // Value is hardcoded
 
 // Output the results
 console.log('\n' + colors.highlight('🌳 TreeSift Component Analysis'));
