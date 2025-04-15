@@ -1,4 +1,3 @@
-#!/usr/bin/env tsx
 /**
  * @file Test file for TreeSift
  * @author Preston Arnold
@@ -8,8 +7,13 @@
  * @lastModified 14/04/24
  */
 
-import type { Console } from 'console';
-declare const console: Console; // lmao
+// Add type declaration for console (very silly stuff)
+declare const console: {
+  log: (...args: any[]) => void;
+  error: (...args: any[]) => void;
+  warn: (...args: any[]) => void;
+  info: (...args: any[]) => void;
+};
 
 import { TreeSift } from './index';
 import chalk from 'chalk';
