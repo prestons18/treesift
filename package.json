@@ -1,6 +1,6 @@
 {
   "name": "treesift",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "A powerful JavaScript/TypeScript AST analysis library for React components and beyond",
   "license": "MIT",
   "author": "Preston Arnold",
